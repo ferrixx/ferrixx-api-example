@@ -125,17 +125,20 @@ async function showDashboard(user) {
   loadPosts();
 }
 
-// ── Server uptime (status endpoint) ──────────────────────────────────────────
+// ── API status widget ────────────────────────────────────────────────────────
 async function loadUptime() {
   try {
     const data = await apiFetch(`${API_BASE}/status`);
-    if (data.success && data.data) {
-      document.getElementById('dashUptime').textContent  = data.data.uptime  || '—';
-      document.getElementById('dashServers').textContent =
-        `${data.data.servers_online ?? '—'} / ${data.data.servers_total ?? '—'} online`;
-      document.getElementById('dashVersion').textContent = data.data.version || '—';
+    if (data.success && data.data?.api) {
+      const api    = data.data.api;
+      const status = api.status || 'unknown';
+      const el     = document.getElementById('dashUptime');
+      el.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+      el.style.color = status === 'operational' ? 'var(--green)' : 'var(--yellow)';
+      document.getElementById('dashUptime2').textContent = data.data.uptime || '—';
+      document.getElementById('dashVersion').textContent = api.version ? `v${api.version}` : '—';
     }
-  } catch { /* silent — uptime is decorative */ }
+  } catch { /* silent — widget is decorative */ }
 }
 
 // ── Posts ─────────────────────────────────────────────────────────────────────
